@@ -4,35 +4,30 @@
  */
 package com.videorecognition;
 
-import com.xuggle.xuggler.ICodec;
-import com.xuggle.xuggler.IContainer;
-import com.xuggle.xuggler.IPacket;
-import com.xuggle.xuggler.IStream;
-import com.xuggle.xuggler.IStreamCoder;
-import com.xuggle.xuggler.IVideoPicture;
-import com.xuggle.xuggler.Utils;
+import com.xuggle.xuggler.*;
+
+import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javax.imageio.ImageIO;
 
 /**
  *
  * @author Mike
  */
-public class VideoSeparator implements Runnable{
+public class VideoSeparator extends Thread{
     private final Long startTimestamp;
     private final Long endTimestamp;
     private final String pathToMovie;
-    private final File pathToFrames;
+    private final String pathToFrames;
     
     public VideoSeparator(){
         throw new RuntimeException("You cannot invoke VideoSeparator constructor without params!");
     }
     
-    public VideoSeparator(Long startTimestamp, Long endTimestamp, final String pathToMovie, final File pathToFrames){
+    public VideoSeparator(Long startTimestamp, Long endTimestamp, final String pathToMovie, final String pathToFrames){
         if(null == startTimestamp || null == endTimestamp || null == pathToMovie || null == pathToFrames)
             throw new RuntimeException("startTimestamp, endTimestamp or pathToMovie must not be null!");
         this.startTimestamp = startTimestamp;
@@ -43,11 +38,14 @@ public class VideoSeparator implements Runnable{
 
     @Override
     public void run() {
-        System.out.println("Thread id:" + this);
-        long start = startTimestamp;
-        long end = endTimestamp;
+        if(!pathToFrames.trim().isEmpty()){
+            File f = new File(this.pathToFrames);
+            if(f.exists())
+                f.delete();
+            f.mkdir();
+        }
+        System.out.println("Thread name:" + this.getName());
         IContainer container = IContainer.make();
-
         if (container.open(pathToMovie, IContainer.Type.READ, null) < 0) {
             throw new IllegalArgumentException("could not open file: "
                     + pathToMovie);
@@ -56,7 +54,7 @@ public class VideoSeparator implements Runnable{
         int videoStreamId = -1;
         IStreamCoder videoCoder = null;
 
-        // нужно найти видео поток
+        // find video stream
         for (int i = 0; i < numStreams; i++) {
             IStream stream = container.getStream(i);
             IStreamCoder coder = stream.getStreamCoder();
@@ -66,27 +64,19 @@ public class VideoSeparator implements Runnable{
                 break;
             }
         }
-        if (videoStreamId == -1) // кажись не нашли
+        if (videoStreamId == -1) // video stream for the file does not exist
         {
             throw new RuntimeException("could not find video stream in container: "
                     + pathToMovie);
         }
 
-        // пытаемся открыть кодек
+        // open video codec
         if (videoCoder.open() < 0) {
             throw new RuntimeException(
                     "could not open video decoder for container: " + pathToMovie);
         }
 
         IPacket packet = IPacket.make();
-        // с 3-ей по 5-ую микросекунду
-        //long start = 0 * 1000 * 1000;
-        //long end = 400 * 1000 * 1000;
-        // с разницей в 100 милисекунд
-        //long step = 1;
-        //long counter = 0;
-        //System.out.println(container.getBitRate());
-
         END:
         while (container.readNextPacket(packet) >= 0) {
 
@@ -105,15 +95,11 @@ public class VideoSeparator implements Runnable{
                                 + pathToMovie);
                     }
                     offset += bytesDecoded;
-                    // В общем случае, нужно будет использовать Resampler. См.
-                    // tutorials!
                     if (picture.isComplete()) {
                         IVideoPicture newPic = picture;
-                        // в микросекундах
+                        // microseconds
                         long timestamp = picture.getTimeStamp();
-                        if (timestamp > start) {
-                            //counter++;
-                            // Получаем стандартный BufferedImage
+                        if (timestamp > this.startTimestamp) {
                             BufferedImage javaImage = Utils
                                     .videoPictureToImage(newPic);
                             String fileName = String.format("%07d.png",
@@ -121,13 +107,12 @@ public class VideoSeparator implements Runnable{
                             try {
                                 ImageIO.write(javaImage, "PNG", new File(pathToFrames,
                                         fileName));
-                                System.out.println("Thread: " + this);
+                                System.out.println("Thread: " + this.getName());
                             } catch (IOException ex) {
                                 Logger.getLogger(VideoSeparator.class.getName()).log(Level.SEVERE, null, ex);
                             }
-                            //start += step;
                         }
-                        if (timestamp > end) {
+                        if (timestamp > this.endTimestamp) {
                             break END;
                         }
                     }
@@ -136,11 +121,9 @@ public class VideoSeparator implements Runnable{
         }
         if (videoCoder != null) {
             videoCoder.close();
-            videoCoder = null;
         }
         if (container != null) {
             container.close();
-            container = null;
         }
 
     }

@@ -4,19 +4,13 @@
  */
 package com.videorecognition;
 
-import com.xuggle.xuggler.IContainer;
-
-import java.io.File;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-
 /**
  *
  * @author Mike
  */
 public class XugglerVideoSeparator {
-    private final static String filename = "C:\\tmp\\00012.MTS";
-    private final static File outdir = new File("C:\\tmp\\12");
+    /*private final static String filename = "C:\\tmp\\00012.MTS";
+    private final static String outdir = new File("C:\\tmp\\12");
     public static void main(String[] args){
         if(!new File(filename).exists()){
             throw new IllegalArgumentException("File["
@@ -40,7 +34,7 @@ public class XugglerVideoSeparator {
         executor.submit(new VideoSeparator(container.getDuration()/2, 5*(container.getDuration()/8), filename, outdir));
         executor.submit(new VideoSeparator(((5*(container.getDuration()/8))+1), 6*(container.getDuration()/8), filename, outdir));
         executor.submit(new VideoSeparator(((6*(container.getDuration()/8)) + 1), 7*(container.getDuration()/8), filename, outdir));
-        executor.submit(new VideoSeparator((7*(container.getDuration()/8) + 1), container.getDuration(), filename, outdir));*/
+        executor.submit(new VideoSeparator((7*(container.getDuration()/8) + 1), container.getDuration(), filename, outdir));
         executor.shutdown();
-    }
+    }*/
 }
