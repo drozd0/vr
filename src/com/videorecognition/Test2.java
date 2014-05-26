@@ -12,6 +12,8 @@ import mpicbg.imagefeatures.Feature;
 import mpicbg.imagefeatures.FloatArray2DSIFT;
 import mpicbg.models.*;
 
+import java.io.File;
+import java.io.IOException;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.util.ArrayList;
@@ -25,16 +27,26 @@ import java.util.List;
 public class Test2{
         final static private DecimalFormat decimalFormat = new DecimalFormat();
         final static private DecimalFormatSymbols decimalFormatSymbols = new DecimalFormatSymbols();
+
+        private File processingFile;
+        private File originFile;
         
         private ImagePlus imp1;
         private ImagePlus imp2;
+        private FileManager fm;
+        private Integer threshold;
+
         
         final private List< Feature > fs1 = new ArrayList< Feature >();
         final private List< Feature > fs2 = new ArrayList< Feature >();
         
-        public Test2(String pathFile1, String pathFile2){
-        imp1 = new ImagePlus(pathFile1);
-        imp2 = new ImagePlus(pathFile2);
+        public Test2(File processingFile, File originalFile, FileManager fileManager, Integer threshold){
+           this.processingFile = processingFile;
+            this.originFile = originalFile;
+        this.imp1 = new ImagePlus(processingFile.getAbsolutePath());
+        this.imp2 = new ImagePlus(originalFile.getAbsolutePath());
+        this.fm = fileManager;
+        this.threshold = threshold;
         decimalFormatSymbolsSetup();
         }
         
@@ -194,7 +206,7 @@ public class Test2{
         }
 */
         /** Execute with default parameters (model is Rigid) */
-        public void test(Collection xData, Collection yData) {
+        public void test(Collection xData, Collection yData) throws IOException {
 
                 final FloatArray2DSIFT sift = new FloatArray2DSIFT( p.sift );
                 final SIFT ijSIFT = new SIFT( sift );
@@ -291,6 +303,9 @@ public class Test2{
                         PointMatch.targetPoints( inliers, p2 );
                         imp1.setRoi( Util.pointsToPointRoi( p1 ) );
                         imp2.setRoi( Util.pointsToPointRoi( p2 ) );
+                }
+                if(inliers.size() > threshold){
+                    fm.copyFilesToDir(new File[]{this.processingFile}, fm.getResult().getAbsolutePath());
                 }
                 System.out.println(imp1.getTitle().substring(1, imp1.getTitle().indexOf('.')) + " " + inliers.size() + " potentially corresponding features identified");
                 //xData.add(Long.valueOf(imp1.getTitle().substring(1, imp1.getTitle().indexOf('.'))));

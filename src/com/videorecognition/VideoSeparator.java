@@ -22,18 +22,20 @@ public class VideoSeparator extends Thread{
     private final Long endTimestamp;
     private final String pathToMovie;
     private final String pathToFrames;
+    private final FileManager fm;
     
     public VideoSeparator(){
         throw new RuntimeException("You cannot invoke VideoSeparator constructor without params!");
     }
     
-    public VideoSeparator(Long startTimestamp, Long endTimestamp, final String pathToMovie, final String pathToFrames){
+    public VideoSeparator(Long startTimestamp, Long endTimestamp, final String pathToMovie, final String pathToFrames, FileManager fm){
         if(null == startTimestamp || null == endTimestamp || null == pathToMovie || null == pathToFrames)
             throw new RuntimeException("startTimestamp, endTimestamp or pathToMovie must not be null!");
         this.startTimestamp = startTimestamp;
         this.endTimestamp = endTimestamp;
         this.pathToMovie = pathToMovie;
         this.pathToFrames = pathToFrames;
+        this.fm = fm;
     }
 
     @Override
@@ -105,8 +107,10 @@ public class VideoSeparator extends Thread{
                             String fileName = String.format("%07d.png",
                                     timestamp);
                             try {
-                                ImageIO.write(javaImage, "PNG", new File(pathToFrames,
-                                        fileName));
+                                synchronized (fm) {
+                                    ImageIO.write(javaImage, "PNG", new File(pathToFrames,
+                                            fileName));
+                                }
                                 System.out.println("Thread: " + this.getName());
                             } catch (IOException ex) {
                                 Logger.getLogger(VideoSeparator.class.getName()).log(Level.SEVERE, null, ex);

@@ -4,6 +4,7 @@ import org.apache.commons.io.FileUtils;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.List;
 
 /**
  * Created by Common on 22.05.2014.
@@ -27,11 +28,27 @@ public class FileManager {
 
     public synchronized void copyFilesToDir(File[] moveFilesToDir, String pathToDir) throws IOException {
         File dir = new File(pathToDir);
+        if(!dir.exists())
+            dir.mkdir();
         for(File f : moveFilesToDir)
             FileUtils.moveFileToDirectory(f, dir, true);
     }
 
-    public File[] listOfFiles(File dir){
+    public synchronized void copyFilesToDir(List<File> moveFilesToDir, String pathToDir) throws IOException {
+        File dir = new File(pathToDir);
+        if(!dir.exists())
+            dir.mkdir();
+        for(File f : moveFilesToDir)
+            FileUtils.moveFileToDirectory(f, dir, true);
+    }
+
+    public synchronized void deleteFiles(List<File> files) throws IOException {
+        for(File f : files){
+            f.delete();
+        }
+    }
+
+    public synchronized File[] listOfFiles(File dir){
         if(dir.isDirectory())
             return dir.listFiles();
         else
