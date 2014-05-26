@@ -40,7 +40,7 @@ public class JavaSift extends Thread {
             for(File processingFile : processingFiles){
                 for (File originFile : originalsFiles){
                     try {
-                        new Test2(processingFile, originFile, fm, 0).test(null,null);
+                        new SiftProcessor(processingFile, originFile, fm, 0).processing(null, null);
                     } catch (IOException e) {
                         e.printStackTrace();
                     }

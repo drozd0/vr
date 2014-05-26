@@ -14,7 +14,7 @@ public class Main {
     private static final ExecutorService executor = Executors.newCachedThreadPool();
     private static final String pathToRoot = "c:\\tmp\\vr";
     private static final String orig = "\\origin";
-    private static final String fileName = "\\00012.MTS";
+    private static final String fileName = "\\test_1.mov";
     private static final String sampleDirName = "\\samples";
     private static final String processedFilesDirName = "\\processedFiles";
     private static final String pathToSamples = pathToRoot + sampleDirName;
@@ -34,8 +34,8 @@ public class Main {
         }
         fm = new FileManager(pathToOriginFiles, pathToSamples, pathToProcessedFiles);
         // Create 2 threads for separating and add to executor
-        createThreadsForSeparating(5, pathToVideoFile, pathToSamples);
-        TimeUnit.SECONDS.sleep(5);
+        //createThreadsForSeparating(1, pathToVideoFile, pathToSamples);
+        //TimeUnit.SECONDS.sleep(20);
         // Create 2 threads for comparing and add to executor
         createThreadsForRecognition(1, pathToSamples, pathToOriginFiles);
         executor.isShutdown();
@@ -81,18 +81,18 @@ public class Main {
                     FileUtils.deleteDirectory(new File(pathForThreadSamples));
 
                     pathOfSamplesForThreads.add(pathForThreadSamples);
-                    fm.copyFilesToDir(entry.getValue(), pathForThreadSamples);
+                    fm.moveFilesToDir(entry.getValue(), pathForThreadSamples);
                     System.out.println("entry with number " + entry.getKey() + " contains " + entry.getValue());
                     fm.deleteFiles(entry.getValue());
                     total += entry.getValue().size();
-                    executor.submit(new JavaSift(pathForThreadSamples, pathToOrigin,fm ));
+                    executor.execute(new JavaSift(pathForThreadSamples, pathToOrigin,fm ));
                 }
 
             }else{
                 for(Map.Entry<Integer, List<File>> entry : deviderOfFiles.entrySet()){
                     String pathForThreadSamples = pathToRoot + "\\thread_JS_" + entry.getKey().toString();
                     System.out.println("entry with number " + entry.getKey() + " contains " + entry.getValue());
-                    fm.copyFilesToDir(entry.getValue(), pathForThreadSamples);
+                    fm.moveFilesToDir(entry.getValue(), pathForThreadSamples);
                     total += entry.getValue().size();
                     fm.deleteFiles(entry.getValue());
                 }

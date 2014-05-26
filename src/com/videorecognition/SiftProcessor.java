@@ -7,7 +7,6 @@ package com.videorecognition;
 import ij.ImagePlus;
 import mpicbg.ij.FeatureTransform;
 import mpicbg.ij.SIFT;
-import mpicbg.ij.util.Util;
 import mpicbg.imagefeatures.Feature;
 import mpicbg.imagefeatures.FloatArray2DSIFT;
 import mpicbg.models.*;
@@ -24,7 +23,7 @@ import java.util.List;
  *
  * @author Mike
  */
-public class Test2{
+public class SiftProcessor {
         final static private DecimalFormat decimalFormat = new DecimalFormat();
         final static private DecimalFormatSymbols decimalFormatSymbols = new DecimalFormatSymbols();
 
@@ -40,7 +39,7 @@ public class Test2{
         final private List< Feature > fs1 = new ArrayList< Feature >();
         final private List< Feature > fs2 = new ArrayList< Feature >();
         
-        public Test2(File processingFile, File originalFile, FileManager fileManager, Integer threshold){
+        public SiftProcessor(File processingFile, File originalFile, FileManager fileManager, Integer threshold){
            this.processingFile = processingFile;
             this.originFile = originalFile;
         this.imp1 = new ImagePlus(processingFile.getAbsolutePath());
@@ -94,119 +93,9 @@ public class Test2{
                 decimalFormat.setMinimumFractionDigits( 3 );
             
         }
-        
-        /*@Override
-        public void run( final String args )
-        {
-                // cleanup
-                fs1.clear();
-                fs2.clear();
-                
-                if ( IJ.versionLessThan( "1.40" ) ) return;
-                
-                final int[] ids = WindowManager.getIDList();
-                if ( ids == null || ids.length < 2 )
-                {
-                        IJ.showMessage( "You should have at least two images open." );
-                        return;
-                }
-                
-                final String[] titles = new String[ ids.length ];
-                for ( int i = 0; i < ids.length; ++i )
-                {
-                        titles[ i ] = ( WindowManager.getImage( ids[ i ] ) ).getTitle();
-                }
-                
-                final GenericDialog gd = new GenericDialog( "Extract SIFT Landmark Correspondences" );
-                
-                gd.addMessage( "Image Selection:" );
-                final String current = WindowManager.getCurrentImage().getTitle();
-                gd.addChoice( "source_image", titles, current );
-                gd.addChoice( "target_image", titles, current.equals( titles[ 0 ] ) ? titles[ 1 ] : titles[ 0 ] );
-                
-                gd.addMessage( "Scale Invariant Interest Point Detector:" );
-                gd.addNumericField( "initial_gaussian_blur :", p.sift.initialSigma, 2, 6, "px" );
-                gd.addNumericField( "steps_per_scale_octave :", p.sift.steps, 0 );
-                gd.addNumericField( "minimum_image_size :", p.sift.minOctaveSize, 0, 6, "px" );
-                gd.addNumericField( "maximum_image_size :", p.sift.maxOctaveSize, 0, 6, "px" );
-                
-                gd.addMessage( "Feature Descriptor:" );
-                gd.addNumericField( "feature_descriptor_size :", p.sift.fdSize, 0 );
-                gd.addNumericField( "feature_descriptor_orientation_bins :", p.sift.fdBins, 0 );
-                gd.addNumericField( "closest/next_closest_ratio :", p.rod, 2 );
-                
-                gd.addMessage( "Geometric Consensus Filter:" );
-                gd.addCheckbox( "filter matches by geometric consensus", p.useGeometricConsensusFilter );
-                gd.addNumericField( "maximal_alignment_error :", p.maxEpsilon, 2, 6, "px" );
-                gd.addNumericField( "minimal_inlier_ratio :", p.minInlierRatio, 2 );
-                gd.addNumericField( "minimal_number_of_inliers :", p.minNumInliers, 0 );
-                gd.addChoice( "expected_transformation :", Param.modelStrings, Param.modelStrings[ p.modelIndex ] );
-                
-                gd.showDialog();
-                
-                if (gd.wasCanceled()) return;
-                
-                imp1 = WindowManager.getImage( ids[ gd.getNextChoiceIndex() ] );
-                imp2 = WindowManager.getImage( ids[ gd.getNextChoiceIndex() ] );
-                
-                p.sift.initialSigma = ( float )gd.getNextNumber();
-                p.sift.steps = ( int )gd.getNextNumber();
-                p.sift.minOctaveSize = ( int )gd.getNextNumber();
-                p.sift.maxOctaveSize = ( int )gd.getNextNumber();
-                
-                p.sift.fdSize = ( int )gd.getNextNumber();
-                p.sift.fdBins = ( int )gd.getNextNumber();
-                p.rod = ( float )gd.getNextNumber();
-                
-                p.useGeometricConsensusFilter = gd.getNextBoolean();
-                p.maxEpsilon = ( float )gd.getNextNumber();
-                p.minInlierRatio = ( float )gd.getNextNumber();
-                p.minNumInliers = ( int )gd.getNextNumber();
-                p.modelIndex = gd.getNextChoiceIndex();
 
-                test1(imp1, imp2);
-        }*/
-
-        /** If unsure, just use default parameters by using exec(ImagePlus, ImagePlus, int) method, where only the model is specified. */
-        /*public void test1(final ImagePlus imp1, final ImagePlus imp2,
-                         final float initialSigma, final int steps,
-                         final int minOctaveSize, final int maxOctaveSize,
-                         final int fdSize, final int fdBins,
-                         final float rod, final float maxEpsilon,
-                         final float minInlierRatio, final int modelIndex) {
-
-                p.sift.initialSigma = initialSigma;
-                p.sift.steps = steps;
-                p.sift.minOctaveSize = minOctaveSize;
-                p.sift.maxOctaveSize = maxOctaveSize;
-
-                p.sift.fdSize = fdSize;
-                p.sift.fdBins = fdBins;
-                p.rod = rod;
-
-                p.useGeometricConsensusFilter = true;
-                p.maxEpsilon = maxEpsilon;
-                p.minInlierRatio = minInlierRatio;
-                p.minNumInliers = 7;
-                p.modelIndex = modelIndex;
-
-                exec( imp1, imp2 );
-        }
-*/
-        
-        /** Execute with default parameters, except the model.
-         *  @param modelIndex: 0=Translation, 1=Rigid, 2=Similarity, 3=Affine */
-        /*public void exec(final ImagePlus imp1, final ImagePlus imp2, final int modelIndex) {
-                if ( modelIndex < 0 || modelIndex > 3 ) {
-                        IJ.log("Invalid model index: " + modelIndex);
-                        return;
-                }
-                p.modelIndex = modelIndex;
-                exec( imp1, imp2 );
-        }
-*/
         /** Execute with default parameters (model is Rigid) */
-        public void test(Collection xData, Collection yData) throws IOException {
+        public void processing(Collection xData, Collection yData) throws IOException {
 
                 final FloatArray2DSIFT sift = new FloatArray2DSIFT( p.sift );
                 final SIFT ijSIFT = new SIFT( sift );
@@ -297,15 +186,15 @@ public class Test2{
                         //System.out.println( candidates.size() + " corresponding features identified." );
                 }
                 
-                if ( inliers.size() > 0 )
+                /*if ( inliers.size() > 0 )
                 {
                         PointMatch.sourcePoints( inliers, p1 );
                         PointMatch.targetPoints( inliers, p2 );
                         imp1.setRoi( Util.pointsToPointRoi( p1 ) );
                         imp2.setRoi( Util.pointsToPointRoi( p2 ) );
-                }
+                }*/
                 if(inliers.size() > threshold){
-                    fm.copyFilesToDir(new File[]{this.processingFile}, fm.getResult().getAbsolutePath());
+                    fm.renameFile(this.processingFile.getAbsolutePath(), fm.getResult().getAbsolutePath() + "\\" + this.processingFile.getName().substring(0, this.processingFile.getName().indexOf(".") ) + "_inliers_" + inliers.size() + "_" + this.originFile.getName());
                 }
                 System.out.println(imp1.getTitle().substring(1, imp1.getTitle().indexOf('.')) + " " + inliers.size() + " potentially corresponding features identified");
                 //xData.add(Long.valueOf(imp1.getTitle().substring(1, imp1.getTitle().indexOf('.'))));

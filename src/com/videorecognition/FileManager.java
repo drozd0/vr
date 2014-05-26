@@ -26,7 +26,7 @@ public class FileManager {
         FileUtils.copyDirectory(dirFrom, dirTo);
     }
 
-    public synchronized void copyFilesToDir(File[] moveFilesToDir, String pathToDir) throws IOException {
+    public synchronized void moveFilesToDir(File[] moveFilesToDir, String pathToDir) throws IOException {
         File dir = new File(pathToDir);
         if(!dir.exists())
             dir.mkdir();
@@ -34,12 +34,18 @@ public class FileManager {
             FileUtils.moveFileToDirectory(f, dir, true);
     }
 
-    public synchronized void copyFilesToDir(List<File> moveFilesToDir, String pathToDir) throws IOException {
+    public synchronized void moveFilesToDir(List<File> moveFilesToDir, String pathToDir) throws IOException {
         File dir = new File(pathToDir);
         if(!dir.exists())
             dir.mkdir();
         for(File f : moveFilesToDir)
             FileUtils.moveFileToDirectory(f, dir, true);
+    }
+
+    public synchronized void renameFile(String fileForMoving, String newFilePath) throws IOException {
+        File oldFile = new File(fileForMoving);
+        File newFile = new File(newFilePath);
+        FileUtils.copyFile(oldFile, newFile);
     }
 
     public synchronized void deleteFiles(List<File> files) throws IOException {
