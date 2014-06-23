@@ -79,7 +79,7 @@ public class SiftProcessor {
                  * Implemeted transformation models for choice
                  */
                 final static public String[] modelStrings = new String[]{ "Translation", "Rigid", "Similarity", "Affine", "Perspective" };
-                public int modelIndex = 3;
+                public int modelIndex = 4;
         }
         
         final static private Param p = new Param();
